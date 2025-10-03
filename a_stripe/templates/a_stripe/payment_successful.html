@@ -1,0 +1,13 @@
+{% extends 'layouts/blank.html' %}
+
+{% block content %}
+
+<div class="max-w-4xl mx-auto px-8 py-24 text-center">
+    <h1>Merci pour votre commande {{ customer.name }} !</h1>
+    <p class="my-10 text-gray-500">
+        Paiement réussi.
+    </p>
+    <a class="button" href="{% url 'home' %}">Retour à l'accueil</a>
+</div>
+
+{% endblock %}

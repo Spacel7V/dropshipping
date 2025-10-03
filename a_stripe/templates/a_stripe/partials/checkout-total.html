@@ -1,0 +1,22 @@
+<div id="checkout_total" class="rounded-xl border p-6 sticky top-8">
+  {% if cart|length == 0 %}
+    <p class="font-medium">Panier vide</p>
+    <p class="text-sm text-gray-500 mb-4">Ajoutez des articles pour continuer.</p>
+    <button type="button"
+            class="w-full cursor-not-allowed opacity-50 rounded-lg px-4 py-3 font-semibold bg-gray-200"
+            aria-disabled="true">
+      Procéder au paiement
+    </button>
+  {% else %}
+    <div class="flex items-center justify-between mb-4">
+      <span class="font-medium">Total</span>
+      <span class="text-lg font-semibold">
+        {{ cart.get_total_cost|floatformat:2 }}€
+      </span>
+    </div>
+    <a href="{% url 'checkout' %}"
+       class="w-full inline-flex justify-center rounded-lg px-4 py-3 font-semibold bg-black text-white">
+      Procéder au paiement
+    </a>
+  {% endif %}
+</div>

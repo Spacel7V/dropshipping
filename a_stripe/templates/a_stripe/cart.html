@@ -1,0 +1,86 @@
+{% extends 'layouts/blank.html' %}
+
+{% block content %}
+
+<div class="max-w-6xl mx-auto p-12">
+    <h1>My Cart</h1>
+    <div class="md:grid grid-cols-3 gap-8">
+        <div class="col-span-2">
+            <ul class="flex flex-col divide-y">
+
+                {% for product in cart %}
+                <li class="flex items-center py-4">
+                    <a href="" class="block aspect-square bg-gray-100 w-36">
+                        <img src="{{ product.image }}">
+                    </a>
+                    <div class="flex justify-between w-full pl-6">
+                        <div>
+                            <span>{{ product.name }}</span>
+                            <div class="flex items-center gap-4 mt-2">
+                                <form hx-post="{% url 'update_checkout' product.id %}" hx-target="#checkout_total"
+                                    hx-swap="outerHTML" hx-trigger="change">
+                                    <select name="quantity" class="py-2 pr-2 cursor-pointer">
+                                        {% for i in quantity_range %}
+                                        <option value="{{ i }}" {% if i == product.quantity %}selected{% endif %}>{{ i }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </form>
+                                <a href="{% url 'remove_from_cart' product.id %}" class="text-red-500 cursor-pointer">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+  <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+</svg>
+
+                                </a>
+                            </div>
+                        </div>
+                        <div id="product-total-{{ product.id }}">
+                            {{ product.total_price|floatformat:2 }}€
+                        </div>
+                    </div>
+                </li>
+                {% endfor %}
+
+            </ul>
+        </div>
+
+        {% include 'a_stripe/partials/checkout-total.html' %}
+
+    </div>
+</div>
+<div id="checkout-loading"
+     class="fixed inset-0 z-50 hidden items-center justify-center bg-black/40 backdrop-blur-sm">
+  <div class="flex flex-col items-center gap-4" style="margin-top: 20%;">
+    <div class="h-12 w-12 rounded-full border-4 border-white/30 border-t-white animate-spin"
+         role="status" aria-label="Chargement"></div>
+    <p class="text-white font-medium">Mise à jour du total…</p>
+  </div>
+</div>
+
+<script>
+  const overlay = document.getElementById('checkout-loading');
+  const showOverlay = () => overlay.classList.remove('hidden');
+  const hideOverlay = () => overlay.classList.add('hidden');
+  document.body.addEventListener('htmx:beforeRequest', (evt) => {
+    const elt = evt.detail.elt;
+    if (!elt) return;
+    const target = elt.getAttribute('hx-target') || elt.closest('[hx-target]')?.getAttribute('hx-target');
+    if (target === '#checkout_total') {
+      showOverlay();
+    }
+  });
+
+  document.body.addEventListener('htmx:afterSwap', (evt) => {
+    const tgt = evt.detail.target;
+    if (tgt && tgt.id === 'checkout_total') {
+      hideOverlay();
+    }
+  });
+
+  document.body.addEventListener('htmx:responseError', hideOverlay);
+  document.body.addEventListener('htmx:requestError', hideOverlay);
+</script>
+
+
+
+{% endblock %}
